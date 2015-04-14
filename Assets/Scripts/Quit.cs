@@ -15,6 +15,6 @@ public class Quit : MonoBehaviour {
 
 	void OnMouseDown()
 	{
-		Application.Quit ();
+		if(transform.renderer.enabled == true) Application.Quit ();
 	}
 }

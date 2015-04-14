@@ -2,7 +2,7 @@
 using System.Collections;
 
 public class Progress : MonoBehaviour {
-	public GameObject infiltrator;
+	private GameObject infiltrator;
 	public float x;
 	public float yMin;
 	public float yMax;
@@ -10,7 +10,7 @@ public class Progress : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-	
+		infiltrator = GameObject.Find ("Infiltrator");
 	}
 	
 	// Update is called once per frame

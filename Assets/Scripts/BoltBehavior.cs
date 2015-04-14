@@ -22,7 +22,8 @@ public class BoltBehavior : MonoBehaviour {
 		else
 			if(fired == true) cooldown += Time.deltaTime;
 		if(Input.GetMouseButton(0) && fired == false 
-		   && GetComponentInParent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("Idle")) {
+		   && GetComponentInParent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("Idle")
+		   && GetComponentInParent<Movement>().hidden == false) {
 				Vector2 flick = new Vector2 (Input.mousePosition.x, Input.mousePosition.y);
 				cooldown = 0.1f;
 				fired = true;

@@ -26,7 +26,7 @@ public class ComputerScript : MonoBehaviour {
 		}
 		if (deactive == true) {
 			timeDeactive += Time.deltaTime;
-			if(timeDeactive > 2)
+			if(timeDeactive > 0.4)
 			{
 				timeDeactive = 0;
 				deactive = false;

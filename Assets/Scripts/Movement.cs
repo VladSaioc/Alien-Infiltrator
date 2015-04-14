@@ -6,17 +6,21 @@ public class Movement : MonoBehaviour {
 	public Animator anim;
 	public string axisName = "";
 	public BoltBehavior boltBehav;
+	public GameObject vent1;
+	public GameObject vent2;
 
 	public float speed = 20f;
 	public int facing = 1;
 
 	private float x;
+	public bool hidden;
 	private float tamp;
 	private bool maxSpeed;
 
 	// Use this for initialization
 	void Start () 
 	{
+		hidden = false;
 		anim.SetBool ("stopMovement", false);
 		maxSpeed = false;
 	}
@@ -25,11 +29,15 @@ public class Movement : MonoBehaviour {
 	void Update () {
 		Vector2 v;
 		anim.SetFloat("speed", Mathf.Abs(Input.GetAxis(axisName)));
+		if (Input.GetKeyDown ("0"))
+			Application.Quit ();
 
 		if (Input.GetAxis (axisName) < 0 && !anim.GetBool("tampered") 
-		    && anim.GetCurrentAnimatorStateInfo(0).IsName("Idle")) {
+		    && anim.GetCurrentAnimatorStateInfo(0).IsName("Idle")
+		    && GameObject.Find ("Pause").renderer.enabled == false) {
 			if(Mathf.Abs (Input.GetAxis (axisName)) == 1) maxSpeed = true;
 			v = transform.localScale;
+			Debug.Log (hidden);
 			if(Input.GetAxis (axisName) > -0.4f && maxSpeed == true)
 				anim.SetBool ("stopMovement", true);
 			if(Input.GetAxis (axisName) > -0.2f && maxSpeed == true)
@@ -42,6 +50,7 @@ public class Movement : MonoBehaviour {
 		} else if (Input.GetAxis (axisName) > 0 && !anim.GetBool("tampered")
 		           && anim.GetCurrentAnimatorStateInfo(0).IsName("Idle")) {
 			if(Mathf.Abs (Input.GetAxis (axisName)) == 1) maxSpeed = true;
+			Debug.Log (hidden);
 			v = transform.localScale;
 			if(Input.GetAxis (axisName) < 0.4f && maxSpeed == true)
 				anim.SetBool ("stopMovement", true);
@@ -70,9 +79,11 @@ public class Movement : MonoBehaviour {
 			x = Input.GetAxis (axisName);
 		else
 			x = 0;
-		transform.position += transform.right * x * speed * Time.deltaTime;
+		if(!hidden) transform.position += transform.right * x * speed * Time.deltaTime;
 
-		if (Input.GetMouseButtonDown (0) && anim.GetCurrentAnimatorStateInfo(0).IsName("Idle") && !boltBehav.fired) {
+		if (Input.GetMouseButtonDown (0) 
+		    && anim.GetCurrentAnimatorStateInfo(0).IsName("Idle") && !boltBehav.fired 
+		    && !hidden) {
 			anim.SetBool ("tampered", true);
 			tamp = 0;
 		}

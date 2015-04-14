@@ -3,9 +3,10 @@ using System.Collections;
 
 public class HumanBehavior : MonoBehaviour {
 
-	public GameObject infilt;
+	private GameObject infilt;
 	public GameObject guard1;
 	public GameObject guard2;
+	public GameObject guard3;
 	public GameObject distraction;
 	private bool distracted;
 	public float distractionTime;
@@ -25,6 +26,7 @@ public class HumanBehavior : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		infilt = GameObject.Find ("Infiltrator");
 		distracted = false;
 		distractionTime = 0;
 		dead = false;
@@ -33,6 +35,7 @@ public class HumanBehavior : MonoBehaviour {
 			v.x *= (-1);
 			transform.localScale = v;
 		}
+		if(!GameObject.Find("Computer")) distraction = null;
 	}
 	void Turn()
 	{
@@ -40,6 +43,27 @@ public class HumanBehavior : MonoBehaviour {
 		v.x *= (-1);
 		transform.localScale = v;
 		facing = facing * (-1);
+	}
+
+	void GuardDetection(GameObject guard)
+	{
+		//Detection of dead allies
+		if(facing == 1) {
+			if(transform.position.x + sightX * facing > guard.transform.position.x
+			   && transform.position.x < guard.transform.position.x
+			   && transform.position.y + sightY > guard.transform.position.y
+			   && transform.position.y - sightY < guard.transform.position.y
+			   && guard.GetComponent<HumanBehavior>().dead == true)
+				Application.LoadLevel(Application.loadedLevel);}
+		else if(facing == -1)
+		{
+			if(transform.position.x + sightX * facing < guard.transform.position.x
+			   && transform.position.x > guard.transform.position.x
+			   && transform.position.y + sightY > guard.transform.position.y
+			   && transform.position.y - sightY < guard.transform.position.y
+			   && guard.GetComponent<HumanBehavior>().dead == true)
+				Application.LoadLevel(Application.loadedLevel);
+		}
 	}
 
 	// Update is called once per frame
@@ -53,57 +77,40 @@ public class HumanBehavior : MonoBehaviour {
 			anim.SetBool ("dead", dead);
 		if (!dead) 
 		{
-			if (Mathf.Abs (walkDist) <= patrolDist && !distracted) 
-			{
-				float xOffset = transform.position.x;
-				transform.position += transform.right * speed * Time.deltaTime * facing;
-				walkDist += Mathf.Abs (Mathf.Abs(transform.position.x) - Mathf.Abs(xOffset));
-			} 
-			else 
-			{
-				if(!distracted)
-				{
-				if(waitTime <= linger)
-				{
-					waitTime += Time.deltaTime;
-					Debug.Log (waitTime);
-				}
-				else
-				{
-					walkDist = 0;
-					waitTime = 0;
-					Turn();
-				}
-				}
-			}
 			//Distraction
+			if(distraction != null)
+			{
 			if(distraction.GetComponent<ComputerScript>().deactive == true && distracted == false)
 			{
 			   if(facing == 1)
+					{
 					if ((transform.position.x - hearingX < distraction.transform.position.x
 					     && transform.position.x + hearingX > distraction.transform.position.x)
 					    || (transform.position.x + sightX > distraction.transform.position.x
 					    && transform.position.x < distraction.transform.position.x))
 				{
-					facingUndistracted = facing;
+							facingUndistracted = facing;
+							distracted = true;
 					if(transform.position.x > distraction.transform.position.x)
 					{
 						Turn ();
-						distracted = true;
 					}
 				}
+					}
 				else
+					{
 					if ((transform.position.x - hearingX < distraction.transform.position.x
 					     && transform.position.x + hearingX > distraction.transform.position.x)
-					    || (transform.position.x - sightX < distraction.transform.position.x
-					    && transform.position.x > distraction.transform.position.x))
+					    || (transform.position.x + sightX > distraction.transform.position.x
+					    && transform.position.x < distraction.transform.position.x))
 				{
-					facingUndistracted = facing;
+							facingUndistracted = facing;
+							distracted = true;
 					if(transform.position.x < distraction.transform.position.x)
 					{
 						Turn ();
-						distracted = true;
 					}
+				}
 				}
 			}
 			if(distracted == true)
@@ -119,38 +126,52 @@ public class HumanBehavior : MonoBehaviour {
 					}
 				}
 			}
+			}
+			//Walking
+			if (Mathf.Abs (walkDist) <= patrolDist && !distracted) 
+			{
+				float xOffset = transform.position.x;
+				transform.position += transform.right * speed * Time.deltaTime * facing;
+				walkDist += Mathf.Abs (Mathf.Abs(transform.position.x) - Mathf.Abs(xOffset));
+			} 
+			else 
+			{
+				if(!distracted)
+				{
+					if(waitTime <= linger)
+					{
+						waitTime += Time.deltaTime;
+					}
+					else
+					{
+						walkDist = 0;
+						waitTime = 0;
+						Turn();
+					}
+				}
+			}
 			//Detection of character
 			if(facing == 1) {
 			if(transform.position.x + sightX * facing > infilt.transform.position.x
 			   && transform.position.x < infilt.transform.position.x
 			   && transform.position.y + sightY > infilt.transform.position.y
-			   && transform.position.y - sightY < infilt.transform.position.y)
+			   && transform.position.y - sightY < infilt.transform.position.y
+			   && !infilt.GetComponent<Movement>().hidden)
 					Application.LoadLevel(Application.loadedLevel);}
 			else if(facing == -1)
 			{
 				if(transform.position.x + sightX * facing < infilt.transform.position.x
 				   && transform.position.x > infilt.transform.position.x
 				   && transform.position.y + sightY > infilt.transform.position.y
-				   && transform.position.y - sightY < infilt.transform.position.y)
+				   && transform.position.y - sightY < infilt.transform.position.y
+				   && !infilt.GetComponent<Movement>().hidden)
 					Application.LoadLevel(Application.loadedLevel);
 			}
-			//Detection of dead allies
-			if(facing == 1) {
-				if(transform.position.x + sightX * facing > guard1.transform.position.x
-				   && transform.position.x < guard1.transform.position.x
-				   && transform.position.y + sightY > guard1.transform.position.y
-				   && transform.position.y - sightY < guard1.transform.position.y
-				   && guard1.GetComponent<HumanBehavior>().dead == true)
-					Application.LoadLevel(Application.loadedLevel);}
-			else if(facing == -1)
-			{
-				if(transform.position.x + sightX * facing < guard1.transform.position.x
-				   && transform.position.x > infilt.transform.position.x
-				   && transform.position.y + sightY > guard1.transform.position.y
-				   && transform.position.y - sightY < guard1.transform.position.y
-				   && guard1.GetComponent<HumanBehavior>().dead == true)
-					Application.LoadLevel(Application.loadedLevel);
-			}
+
+			//Detection of allies
+			if(guard1 != null) GuardDetection(guard1);
+			if(guard2 != null) GuardDetection(guard2);
+			if(guard3 != null) GuardDetection(guard3);
 		}
 	}
 }
